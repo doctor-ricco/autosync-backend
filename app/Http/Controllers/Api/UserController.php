@@ -8,9 +8,152 @@ use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Auth;
 
 class UserController extends Controller
 {
+    /**
+     * Authenticate user and return token.
+     */
+    public function login(Request $request): JsonResponse
+    {
+        $validator = Validator::make($request->all(), [
+            'email' => 'required|email',
+            'password' => 'required|string',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation failed',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        if (!Auth::attempt($request->only('email', 'password'))) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Invalid credentials'
+            ], 401);
+        }
+
+        $user = Auth::user();
+        
+        if (!$user->is_active) {
+            Auth::logout();
+            return response()->json([
+                'success' => false,
+                'message' => 'Account is deactivated'
+            ], 401);
+        }
+
+        $token = $user->createToken('auth-token')->plainTextToken;
+        $user->updateLastLogin();
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'user' => $user->load('stand'),
+                'token' => $token,
+                'token_type' => 'Bearer'
+            ],
+            'message' => 'Login successful'
+        ]);
+    }
+
+    /**
+     * Register a new user.
+     */
+    public function register(Request $request): JsonResponse
+    {
+        $validator = Validator::make($request->all(), [
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email',
+            'password' => 'required|string|min:8|confirmed',
+            'phone' => 'nullable|string|max:20',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation failed',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        $user = User::create([
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+            'phone' => $request->phone,
+            'role' => 'viewer', // Default role for new registrations
+            'is_active' => true,
+        ]);
+
+        $token = $user->createToken('auth-token')->plainTextToken;
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'user' => $user,
+                'token' => $token,
+                'token_type' => 'Bearer'
+            ],
+            'message' => 'Registration successful'
+        ], 201);
+    }
+
+    /**
+     * Logout user and revoke token.
+     */
+    public function logout(Request $request): JsonResponse
+    {
+        $request->user()->currentAccessToken()->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Logout successful'
+        ]);
+    }
+
+    /**
+     * Get authenticated user information.
+     */
+    public function me(Request $request): JsonResponse
+    {
+        $user = $request->user()->load('stand');
+
+        return response()->json([
+            'success' => true,
+            'data' => $user,
+            'message' => 'User information retrieved successfully'
+        ]);
+    }
+
+    /**
+     * Refresh user token.
+     */
+    public function refresh(Request $request): JsonResponse
+    {
+        $user = $request->user();
+        
+        // Revoke current token
+        $request->user()->currentAccessToken()->delete();
+        
+        // Create new token
+        $token = $user->createToken('auth-token')->plainTextToken;
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'user' => $user->load('stand'),
+                'token' => $token,
+                'token_type' => 'Bearer'
+            ],
+            'message' => 'Token refreshed successfully'
+        ]);
+    }
+
     /**
      * Display a listing of the resource.
      */

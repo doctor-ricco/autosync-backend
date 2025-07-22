@@ -164,7 +164,7 @@ Route::middleware('auth:sanctum')->group(function () {
     
     Route::prefix('users')->group(function () {
         // CRUD completo (Admin)
-        Route::get('/', [UserController::class, 'index'])->middleware('can:view,App\Models\User');
+        Route::get('/', [UserController::class, 'index'])->middleware('can:viewAny,App\Models\User');
         Route::post('/', [UserController::class, 'store'])->middleware('can:create,App\Models\User');
         Route::get('/{id}', [UserController::class, 'show'])->middleware('can:view,App\Models\User');
         Route::put('/{id}', [UserController::class, 'update'])->middleware('can:update,App\Models\User');

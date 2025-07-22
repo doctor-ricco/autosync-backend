@@ -88,7 +88,7 @@ class VehicleViewController extends Controller
         // Se não foi fornecido IP, tentar obter do request
         if (!isset($data['ip_address'])) {
             $data['ip_address'] = $request->ip();
-        }
+    }
 
         // Se não foi fornecido User-Agent, tentar obter do request
         if (!isset($data['user_agent'])) {
