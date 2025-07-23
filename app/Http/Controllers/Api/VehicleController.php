@@ -15,7 +15,9 @@ class VehicleController extends Controller
      */
     public function index(Request $request): JsonResponse
     {
-        $query = Vehicle::with(['stand', 'images', 'primaryImage']);
+        $query = Vehicle::with(['stand', 'images' => function($query) {
+            $query->orderBy('is_primary', 'desc')->orderBy('order_index', 'asc');
+        }]);
 
         // Filtros básicos
         if ($request->has('stand_id')) {
@@ -297,7 +299,9 @@ class VehicleController extends Controller
      */
     public function featured(): JsonResponse
     {
-        $vehicles = Vehicle::with(['stand', 'images', 'primaryImage'])
+        $vehicles = Vehicle::with(['stand', 'images' => function($query) {
+            $query->orderBy('is_primary', 'desc')->orderBy('order_index', 'asc');
+        }])
             ->featured()
             ->available()
             ->orderBy('created_at', 'desc')

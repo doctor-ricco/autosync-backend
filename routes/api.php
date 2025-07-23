@@ -118,6 +118,27 @@ Route::prefix('inquiries')->group(function () {
 Route::middleware('auth:sanctum')->group(function () {
     
     // ============================================================================
+    // ROTAS DE FAVORITOS (Utilizadores autenticados)
+    // ============================================================================
+    
+    Route::prefix('favorites')->group(function () {
+        // Listar favoritos do utilizador
+        Route::get('/', [FavoriteController::class, 'index']);
+        
+        // Adicionar veículo aos favoritos
+        Route::post('/', [FavoriteController::class, 'store']);
+        
+        // Remover veículo dos favoritos
+        Route::delete('/{vehicleId}', [FavoriteController::class, 'destroy']);
+        
+        // Verificar se veículo está nos favoritos
+        Route::get('/check/{vehicleId}', [FavoriteController::class, 'check']);
+        
+        // Alternar favorito (toggle)
+        Route::post('/toggle', [FavoriteController::class, 'toggle']);
+    });
+    
+    // ============================================================================
     // ROTAS DE VEÍCULOS (Admin/Manager/Seller)
     // ============================================================================
     
@@ -181,27 +202,6 @@ Route::middleware('auth:sanctum')->group(function () {
         // Analytics de performance (Admin/Manager)
         Route::get('/{id}/analytics/performance', [UserController::class, 'performanceAnalytics'])->middleware('can:view,App\Models\User');
         Route::get('/{id}/analytics/sales', [UserController::class, 'salesAnalytics'])->middleware('can:view,App\Models\User');
-    });
-    
-    // ============================================================================
-    // ROTAS DE FAVORITOS (Utilizador autenticado)
-    // ============================================================================
-    
-    Route::prefix('favorites')->group(function () {
-        // Listar favoritos do utilizador
-        Route::get('/', [FavoriteController::class, 'index']);
-        
-        // Adicionar aos favoritos
-        Route::post('/', [FavoriteController::class, 'store']);
-        
-        // Remover dos favoritos
-        Route::delete('/{vehicleId}', [FavoriteController::class, 'destroy']);
-        
-        // Toggle favorito
-        Route::post('/{vehicleId}/toggle', [FavoriteController::class, 'toggle']);
-        
-        // Verificar se é favorito
-        Route::get('/{vehicleId}/check', [FavoriteController::class, 'check']);
     });
     
     // ============================================================================
