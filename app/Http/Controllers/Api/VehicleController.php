@@ -38,6 +38,12 @@ class VehicleController extends Controller
             $query->byTransmission($request->transmission);
         }
 
+        if ($request->has('city')) {
+            $query->whereHas('stand', function ($q) use ($request) {
+                $q->where('city', $request->city);
+            });
+        }
+
         if ($request->has('featured')) {
             $query->featured();
         }
@@ -47,18 +53,45 @@ class VehicleController extends Controller
         }
 
         // Filtros de preço
-        if ($request->has('min_price') && $request->has('max_price')) {
-            $query->priceRange($request->min_price, $request->max_price);
+        if ($request->has('min_price') || $request->has('max_price')) {
+            $minPrice = $request->get('min_price');
+            $maxPrice = $request->get('max_price');
+            
+            if ($minPrice !== null && $maxPrice !== null) {
+                $query->priceRange($minPrice, $maxPrice);
+            } elseif ($minPrice !== null) {
+                $query->where('price', '>=', $minPrice);
+            } elseif ($maxPrice !== null) {
+                $query->where('price', '<=', $maxPrice);
+            }
         }
 
         // Filtros de ano
-        if ($request->has('min_year') && $request->has('max_year')) {
-            $query->yearRange($request->min_year, $request->max_year);
+        if ($request->has('min_year') || $request->has('max_year')) {
+            $minYear = $request->get('min_year');
+            $maxYear = $request->get('max_year');
+            
+            if ($minYear !== null && $maxYear !== null) {
+                $query->yearRange($minYear, $maxYear);
+            } elseif ($minYear !== null) {
+                $query->where('year', '>=', $minYear);
+            } elseif ($maxYear !== null) {
+                $query->where('year', '<=', $maxYear);
+            }
         }
 
         // Filtros de quilometragem
-        if ($request->has('min_mileage') && $request->has('max_mileage')) {
-            $query->mileageRange($request->min_mileage, $request->max_mileage);
+        if ($request->has('min_mileage') || $request->has('max_mileage')) {
+            $minMileage = $request->get('min_mileage');
+            $maxMileage = $request->get('max_mileage');
+            
+            if ($minMileage !== null && $maxMileage !== null) {
+                $query->mileageRange($minMileage, $maxMileage);
+            } elseif ($minMileage !== null) {
+                $query->where('mileage', '>=', $minMileage);
+            } elseif ($maxMileage !== null) {
+                $query->where('mileage', '<=', $maxMileage);
+            }
         }
 
         // Busca por texto
