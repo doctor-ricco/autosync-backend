@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('vehicle_images', function (Blueprint $table) {
             $table->id();
             $table->foreignId('vehicle_id')->constrained()->onDelete('cascade');
+            $table->string('cloudinary_id', 255)->nullable(); // ID único no Cloudinary
             $table->string('url', 500);
             $table->string('alt_text', 255)->nullable();
             $table->boolean('is_primary')->default(false);
@@ -24,6 +25,7 @@ return new class extends Migration
             $table->timestamps();
             
             $table->index('vehicle_id');
+            $table->index('cloudinary_id');
             $table->index('is_primary');
             $table->index('order_index');
         });

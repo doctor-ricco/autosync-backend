@@ -17,6 +17,7 @@ class VehicleImage extends Model
      */
     protected $fillable = [
         'vehicle_id',
+        'cloudinary_id',
         'url',
         'alt_text',
         'is_primary',
@@ -245,13 +246,14 @@ class VehicleImage extends Model
      */
     public function getAltTextAttribute(): string
     {
-        if ($this->alt_text) {
-            return $this->alt_text;
+        // Se temos alt_text definido, usar
+        if (!empty($this->attributes['alt_text'])) {
+            return $this->attributes['alt_text'];
         }
 
-        $vehicle = $this->vehicle;
-        if ($vehicle) {
-            return "{$vehicle->brand} {$vehicle->model} {$vehicle->year} - Imagem " . ($this->order_index + 1);
+        // Se temos vehicle carregado, gerar alt text
+        if ($this->relationLoaded('vehicle') && $this->vehicle) {
+            return "{$this->vehicle->brand} {$this->vehicle->model} {$this->vehicle->year} - Imagem " . ($this->order_index + 1);
         }
 
         return 'Imagem do veículo';

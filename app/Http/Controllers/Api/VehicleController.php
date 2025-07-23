@@ -264,7 +264,7 @@ class VehicleController extends Controller
      */
     public function featured(): JsonResponse
     {
-        $vehicles = Vehicle::with(['stand', 'primaryImage'])
+        $vehicles = Vehicle::with(['stand', 'images', 'primaryImage'])
             ->featured()
             ->available()
             ->orderBy('created_at', 'desc')

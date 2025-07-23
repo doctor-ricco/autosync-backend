@@ -3,6 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\VehicleController;
+use App\Http\Controllers\Api\VehicleImageController;
 use App\Http\Controllers\Api\StandController;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\FavoriteController;
@@ -127,9 +128,11 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::delete('/{id}', [VehicleController::class, 'destroy'])->middleware('can:delete,App\Models\Vehicle');
         
         // Gestão de imagens (Admin/Manager)
-        Route::post('/{id}/images', [VehicleController::class, 'uploadImages'])->middleware('can:update,App\Models\Vehicle');
-        Route::delete('/{id}/images/{imageId}', [VehicleController::class, 'deleteImage'])->middleware('can:update,App\Models\Vehicle');
-        Route::put('/{id}/images/{imageId}/primary', [VehicleController::class, 'setPrimaryImage'])->middleware('can:update,App\Models\Vehicle');
+        Route::post('/{id}/images', [VehicleImageController::class, 'upload'])->middleware('can:update,App\Models\Vehicle');
+        Route::get('/{id}/images', [VehicleImageController::class, 'index'])->middleware('can:view,App\Models\Vehicle');
+        Route::delete('/{id}/images/{imageId}', [VehicleImageController::class, 'destroy'])->middleware('can:update,App\Models\Vehicle');
+        Route::put('/{id}/images/{imageId}/primary', [VehicleImageController::class, 'setPrimary'])->middleware('can:update,App\Models\Vehicle');
+        Route::put('/{id}/images/reorder', [VehicleImageController::class, 'reorder'])->middleware('can:update,App\Models\Vehicle');
         
         // Gestão de status (Admin/Manager/Seller)
         Route::patch('/{id}/status', [VehicleController::class, 'updateStatus'])->middleware('can:update,App\Models\Vehicle');
